@@ -1,0 +1,33 @@
+---
+import Base from "./Base.astro";
+
+interface Props {
+  frontmatter: {
+    title: string;
+    heading: string;
+    description: string;
+    updated: string;
+    articleType: "Article" | "TechArticle";
+  };
+}
+
+const { title, heading, description, updated, articleType } = Astro.props.frontmatter;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": articleType,
+  headline: heading,
+  description,
+  dateModified: updated,
+  image: new URL("/og.png", Astro.site).href,
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+  author: { "@type": "Person", name: "Cloud Ko" },
+};
+---
+
+<Base {title} {description} {jsonLd} ogType="article">
+  <article class="prose">
+    <h1>{heading}</h1>
+    <p class="mono updated">UPDATED {updated}</p>
+    <slot />
+  </article>
+</Base>

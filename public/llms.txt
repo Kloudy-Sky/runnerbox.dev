@@ -1,0 +1,8 @@
+# runnerbox
+
+Free, MIT-licensed tools for seeing what your GitHub Actions cost and running CI on hardware you own.
+
+- [Why I built this](https://runnerbox.dev/story/): six days of AI agents pushing code, $237 of CI usage at list price.
+- [Cut your GitHub Actions costs](https://runnerbox.dev/cut-github-actions-costs/): fixes in order of effort, with runner prices.
+- [Self-host a GitHub Actions runner](https://runnerbox.dev/self-host-github-actions-runner/): what it takes, how much slower it is, and when not to.
+- [Source code](https://github.com/Kloudy-Sky/runnerbox): `runnerbox report` works today. `runnerbox up` hasn't run a real job yet.
