@@ -1,0 +1,178 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Why is my GitHub Actions bill so high? | runnerbox";
+const description =
+  "AI agents push all day and CI bills by the minute. See what your GitHub Actions cost, cut the expensive jobs, and move the rest to a machine you own. Free and open source.";
+const headline = "Your agents push all day. CI bills by the minute.";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  name: "runnerbox",
+  description,
+  url: "https://runnerbox.dev",
+  codeRepository: "https://github.com/Kloudy-Sky/runnerbox",
+  programmingLanguage: "TypeScript",
+  license: "https://opensource.org/licenses/MIT",
+  author: { "@type": "Person", name: "Cloud Ko" },
+};
+
+// The total counts up at a constant rate, so each bar starts and ends as the total passes its subtotal.
+const COUNT_DELAY_MS = 640;
+const COUNT_MS = 4500;
+const TOTAL = 237;
+const lines = [
+  { name: "macOS builds", amount: 136, hot: true },
+  { name: "Linux jobs", amount: 85, hot: false },
+  { name: "Windows builds", amount: 16, hot: false },
+].reduce<{ name: string; amount: number; hot: boolean; startMs: number; lengthMs: number }[]>((rows, line) => {
+  const previous = rows.at(-1);
+  const startMs = previous ? previous.startMs + previous.lengthMs : COUNT_DELAY_MS;
+  return [...rows, { ...line, startMs, lengthMs: Math.round((line.amount / TOTAL) * COUNT_MS) }];
+}, []);
+const largest = Math.max(...lines.map((line) => line.amount));
+
+const fixes = [
+  { name: "Find the expensive row", note: "The report, or your billing page", tag: "START HERE", href: "/cut-github-actions-costs/#find-the-expensive-row" },
+  { name: "Build apps on releases", note: "One workflow edit", tag: "MOST OF $152", href: "/cut-github-actions-costs/#build-desktop-apps-on-releases" },
+  { name: "Batch agent pushes", note: "One line of instructions", tag: "$22", href: "/cut-github-actions-costs/#batch-agent-pushes" },
+  { name: "Move Linux to your box", note: "A spare computer and some setup", tag: "UP TO $85", href: "/self-host-github-actions-runner/" },
+];
+
+const speeds = [
+  { name: "First test", note: "One job, no VM", tag: "1.25X" },
+  { name: "End-to-end jobs", note: "In a firewalled VM", tag: "1.5 TO 1.8X" },
+  { name: "CPU-heavy checks", note: "i5-10210U, 7 GB of RAM", tag: "4 TO 8X" },
+];
+---
+
+<Base {title} {description} {jsonLd}>
+  <script is:inline slot="head" define:vars={{ COUNT_DELAY_MS, COUNT_MS }}>
+    (() => {
+      if (!window.IntersectionObserver || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      document.documentElement.classList.add("js");
+
+      const GREEN = [61, 220, 132];
+      const YELLOW = [255, 214, 10];
+      const RED = [255, 68, 56];
+      const mix = (from, to, t) => `rgb(${from.map((value, i) => Math.round(value + (to[i] - value) * t)).join(",")})`;
+
+      const countUp = (el) => {
+        const total = Number(el.dataset.total);
+        let start = null;
+        el.textContent = "$0";
+        el.style.color = mix(GREEN, GREEN, 0);
+        const tick = (now) => {
+          start ??= now + COUNT_DELAY_MS;
+          const t = Math.max(0, Math.min((now - start) / COUNT_MS, 1));
+          el.textContent = `$${Math.round(t * total)}`;
+          el.style.color = t < 0.5 ? mix(GREEN, YELLOW, t * 2) : mix(YELLOW, RED, (t - 0.5) * 2);
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("[data-words]").forEach((el) => {
+          el.setAttribute("aria-label", el.textContent);
+          el.innerHTML = el.textContent
+            .split(" ")
+            .map((word, i) => `<span class="word rise" aria-hidden="true" style="--delay:${i * 55}ms">${word}</span>`)
+            .join(" ");
+        });
+        const seen = new IntersectionObserver(
+          (entries) => {
+            entries
+              .filter((entry) => entry.isIntersecting)
+              .forEach(({ target }) => {
+                target.classList.add("on");
+                target.querySelectorAll("[data-total]").forEach(countUp);
+                seen.unobserve(target);
+              });
+          },
+          { threshold: 0.15 },
+        );
+        document.querySelectorAll(".play").forEach((el) => seen.observe(el));
+      });
+    })();
+  </script>
+
+  <section class="hero play">
+    <h1 data-words>{headline}</h1>
+    <p class="rise" style="--delay:520ms">Mac builds were 15% of my minutes and 57% of my bill.</p>
+  </section>
+
+  <section class="bill play" aria-label="Six days of CI costs">
+    <div class="mono rise" style="--delay:640ms">AEON KARAOKE, SIX DAYS, LIST PRICE</div>
+    <div class="sum rise" style="--delay:640ms" data-total={TOTAL}>${TOTAL}</div>
+    {
+      lines.map(({ name, amount, hot, startMs, lengthMs }) => (
+        <div class:list={["line", { hot }]}>
+          <span class="name">{name}</span>
+          <div>
+            <div
+              class="dots"
+              style={`--width:${(amount / largest) * 100}%;--delay:${startMs}ms;--length:${lengthMs}ms`}
+            />
+          </div>
+          <span class="amt rise" style={`--delay:${startMs + lengthMs - 120}ms`}>
+            ${amount}
+          </span>
+        </div>
+      ))
+    }
+  </section>
+
+  <section class="block play">
+    <h2 class="mono rise">SEE WHAT GITHUB ACTIONS COSTS YOU</h2>
+    <pre class="cmd rise" style="--delay:60ms">git clone https://github.com/Kloudy-Sky/runnerbox
+cd runnerbox &amp;&amp; pnpm install
+pnpm runnerbox report --repo you/your-app</pre>
+  </section>
+
+  <section class="block play">
+    <h2 class="mono rise">FIX IT, CHEAPEST FIRST</h2>
+    <div class="rows">
+      {
+        fixes.map(({ name, note, tag, href }, i) => (
+          <a class="row rise" {href} style={`--delay:${(i + 1) * 60}ms`}>
+            <span class="row-name">{name}</span>
+            <span class="row-note">{note}</span>
+            <span class="row-tag mono">{tag}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="block play">
+    <h2 class="big rise">Don't self-host on a public repo unless you have to.</h2>
+    <p class="rise" style="--delay:60ms">
+      Any pull request could run code on your machine, and standard GitHub runners are free there anyway. If you have
+      to, <a href="https://github.com/Kloudy-Sky/runnerbox/blob/main/docs/threat-model.md">read the threat model</a> first.
+    </p>
+  </section>
+
+  <section class="block play">
+    <h2 class="mono rise">AN OLD LAPTOP IS SLOWER</h2>
+    <div class="rows">
+      {
+        speeds.map(({ name, note, tag }, i) => (
+          <div class="row rise" style={`--delay:${(i + 1) * 60}ms`}>
+            <span class="row-name">{name}</span>
+            <span class="row-note">{note}</span>
+            <span class="row-tag mono bright">{tag}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="block play">
+    <p class="rise">
+      <code>runnerbox report</code> works today. The launcher hasn't run a real job, so don't point CI at it. <a
+        href="/story/">Read how I got here</a>.
+    </p>
+  </section>
+</Base>

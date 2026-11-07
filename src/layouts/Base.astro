@@ -1,0 +1,58 @@
+---
+import "@fontsource-variable/geist/wght.css";
+import "@fontsource-variable/jetbrains-mono/wght.css";
+import "../styles/site.css";
+
+interface Props {
+  title: string;
+  description: string;
+  jsonLd: Record<string, unknown>;
+  ogType?: "website" | "article";
+}
+
+const { title, description, jsonLd, ogType = "website" } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/og.png", Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#141414" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:site_name" content="runnerbox" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <slot name="head" />
+  </head>
+  <body>
+    <div class="site">
+      <nav class="bar-top mono" aria-label="Main">
+        <a href="/">RUNNERBOX</a>
+        <span class="links">
+          <a href="/story/">STORY</a>
+          <a href="/cut-github-actions-costs/">GUIDE</a>
+          <a href="https://github.com/Kloudy-Sky/runnerbox">GITHUB</a>
+        </span>
+      </nav>
+      <slot />
+      <footer class="foot mono">
+        <span>BY CLOUD KO, <a href="https://aeonkaraoke.com">AEON KARAOKE</a></span>
+        <span>FREE, MIT LICENSED</span>
+      </footer>
+    </div>
+  </body>
+</html>
