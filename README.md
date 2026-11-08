@@ -7,7 +7,7 @@ pnpm install
 pnpm dev
 ```
 
-`pnpm build` runs in CI. Pushes to `main` deploy to GitHub Pages only when the repository variable `PAGES_LIVE` is `true`.
+`pnpm build` runs in CI. Cloudflare Pages builds and deploys `main` to [www.runnerbox.dev](https://www.runnerbox.dev), and Porkbun forwards the bare domain there.
 
 ## License
 
